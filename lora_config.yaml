@@ -1,18 +1,26 @@
 # LoRA fine-tuning config for Fimbulvetr 11B v2
 # Tuned for Apple Silicon with limited unified memory
+# Key names follow the mlx-lm 0.30 schema
 
 # LoRA hyperparameters
-lora_layers: 16          # Number of layers to apply LoRA to
-lora_rank: 8             # Rank of LoRA matrices (lower = less VRAM, 8 is a good start)
-lora_alpha: 16           # Scaling factor (typically 2x rank)
-lora_dropout: 0.05
+num_layers: 16           # Number of layers to apply LoRA to
+lora_parameters:
+  rank: 8                # Rank of LoRA matrices (lower = less memory, 8 is a good start)
+  scale: 16.0            # Scaling factor (typically 2x rank)
+  dropout: 0.05
 
 # Training hyperparameters
 batch_size: 1            # Keep at 1 for 11B on limited unified memory
 iters: 1000              # Total training iterations
 learning_rate: 1e-5      # Conservative LR for fine-tuning
-warmup_iters: 100        # Linear warmup steps
-weight_decay: 0.01
+optimizer: adamw
+optimizer_config:
+  adamw:
+    weight_decay: 0.01
+lr_schedule:
+  name: linear_schedule  # Warm up over 100 steps, then hold the rate flat
+  arguments: [1e-5, 1e-5, 1000]
+  warmup: 100
 
 # Evaluation
 val_batches: 25
